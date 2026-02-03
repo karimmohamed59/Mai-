@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -74,12 +74,45 @@
     margin-top: 15px;
     display: none; /* hidden by default */
   }
+
+  /* Hearts animation */
+  #hearts-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1000;
+  }
+
+  .heart {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: url('https://i.ibb.co/7rSm6kT/heart.png') no-repeat center center;
+    background-size: contain;
+    opacity: 0.8;
+    animation: floatUp 4s linear forwards;
+  }
+
+  @keyframes floatUp {
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 0.8;
+    }
+    100% {
+      transform: translateY(-600px) scale(1.3);
+      opacity: 0;
+    }
+  }
 </style>
 </head>
 
 <body>
 
-<h1>Will you be my marry me mai♥️? ❤️</h1>
+<h1>Will you marry me mai? ❤️</h1>
 
 <div class="buttons">
   <button id="yesBtn">YES 💖</button>
@@ -89,9 +122,11 @@
 <div id="message"></div>
 
 <div id="photos">
+  <!-- YES images -->
   <img src="photos/yes1.jpg" id="yes1">
   <img src="photos/yes2.jpg" id="yes2">
   <img src="photos/yes3.jpg" id="yes3">
+  <!-- NO images -->
   <img src="photos/no5.jpg" id="no1">
   <img src="photos/no6.jpg" id="no2">
   <img src="photos/no7.jpg" id="no3">
@@ -100,16 +135,20 @@
   <img src="photos/no10.jpg" id="no6">
 </div>
 
+<div id="hearts-container"></div>
+
+<audio id="valentineSong" src="audio/song.mp3"></audio>
+
 <script>
   const yesImages = ["yes1", "yes2", "yes3"];
   const noImages = ["no1","no2","no3","no4","no5","no6"];
   const noMessages = [
     "Pleaseeee 🥺",
-    "Are you sure? 😢",
+    "Are you sure?mai 😢",
     "Come on 😭",
     "Don’t break my heart 💔",
     "I’ll be so sad 🥹",
-    "Last chance  mai 😭❤️"
+    "Last chance 😭❤️"
   ];
 
   const yesBtn = document.getElementById("yesBtn");
@@ -118,26 +157,47 @@
 
   let noCount = 0;
 
-  // YES button shows all yes images
+  // YES button
   yesBtn.onclick = () => {
+    // show all YES images
     yesImages.forEach(id => {
       document.getElementById(id).style.display = "block";
     });
+
     message.innerHTML = "YAAAY 💖 I knew it 😍❤️";
+
+    // play song
+    const song = document.getElementById("valentineSong");
+    song.play();
+
+    // create floating hearts
+    const heartsContainer = document.getElementById("hearts-container");
+
+    for (let i = 0; i < 20; i++) {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.style.left = Math.random() * window.innerWidth + "px";
+      heart.style.animationDuration = (3 + Math.random() * 2) + "s";
+      heartsContainer.appendChild(heart);
+
+      setTimeout(() => {
+        heartsContainer.removeChild(heart);
+      }, 5000);
+    }
   };
 
-  // NO button moves and shows one NO image each time
+  // NO button
   noBtn.onclick = () => {
     const imgId = noImages[noCount % noImages.length];
     document.getElementById(imgId).style.display = "block";
     message.innerHTML = noMessages[noCount % noMessages.length];
 
-    // move NO button randomly
+    // playful movement
     const moveX = Math.random() * 200 - 100;
     const moveY = Math.random() * 60 - 30;
     noBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
 
-    // slightly grow YES button
+    // grow YES button
     const scale = 1 + (noCount + 1) * 0.12;
     yesBtn.style.transform = `scale(${scale})`;
 
