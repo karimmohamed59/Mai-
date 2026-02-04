@@ -5,210 +5,35 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Mai — Will you be my Valentine?</title>
   <style>
-    :root{
-      --bg: #fff0f6;
-      --accent: #ff4d6d;
-      --muted: #7a536b;
-    }
-    html,body{
-      height:100%;
-      margin:0;
-      font-family: "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
-      background: radial-gradient(circle at 10% 10%, #fff0f6 0%, #fff 30%), linear-gradient(180deg,#ffeef2 0%, #fff0f6 100%);
-      color:#3b1f2b;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .card{
-      position:relative;
-      width:min(920px, 95vw);
-      height:min(680px, 85vh);
-      background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,240,246,0.9));
-      border-radius:18px;
-      box-shadow: 0 12px 40px rgba(120,40,70,0.12);
-      padding:30px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,0.6);
-    }
-
-    h1{
-      margin:0;
-      font-size:clamp(24px, 3vw, 40px);
-      letter-spacing:0.4px;
-      color:#5a2336;
-      text-align:center;
-    }
-    p.lead{
-      text-align:center;
-      margin:12px 0 28px;
-      color:var(--muted);
-      font-size:clamp(14px, 1.6vw, 18px);
-    }
-
-    .stage {
-      position:relative;
-      width:100%;
-      height:60%;
-      border-radius:12px;
-      background: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.65), transparent 10%),
-                  linear-gradient(180deg, rgba(255,240,246,0.6), rgba(255, 245, 248, 0.2));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      user-select:none;
-    }
-
-    .btn {
-      appearance:none;
-      border:0;
-      padding:14px 22px;
-      font-size:18px;
-      border-radius:999px;
-      cursor:pointer;
-      box-shadow: 0 8px 18px rgba(120,40,70,0.12);
-      transition: transform 350ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms;
-    }
-
+    /* (CSS same as before, omitted here for brevity in this preview) */
+    :root{ --bg: #fff0f6; --accent: #ff4d6d; --muted: #7a536b; }
+    html,body{ height:100%; margin:0; font-family: "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial; background: radial-gradient(circle at 10% 10%, #fff0f6 0%, #fff 30%), linear-gradient(180deg,#ffeef2 0%, #fff0f6 100%); color:#3b1f2b; display:flex; align-items:center; justify-content:center; }
+    .card{ position:relative; width:min(920px, 95vw); height:min(680px, 85vh); background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,240,246,0.9)); border-radius:18px; box-shadow: 0 12px 40px rgba(120,40,70,0.12); padding:30px; overflow:hidden; border:1px solid rgba(255,255,255,0.6); }
+    h1{ margin:0; font-size:clamp(24px, 3vw, 40px); letter-spacing:0.4px; color:#5a2336; text-align:center; }
+    p.lead{ text-align:center; margin:12px 0 28px; color:var(--muted); font-size:clamp(14px, 1.6vw, 18px); }
+    .stage { position:relative; width:100%; height:60%; border-radius:12px; background: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.65), transparent 10%), linear-gradient(180deg, rgba(255,240,246,0.6), rgba(255, 245, 248, 0.2)); display:flex; align-items:center; justify-content:center; overflow:hidden; user-select:none; }
+    .btn { appearance:none; border:0; padding:14px 22px; font-size:18px; border-radius:999px; cursor:pointer; box-shadow: 0 8px 18px rgba(120,40,70,0.12); transition: transform 350ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms; }
     .btn:active { transform: translateY(2px); }
-
-    .yes {
-      background: linear-gradient(90deg,#ff6b81,#ff3b5c);
-      color:white;
-    }
-    .no {
-      background: white;
-      color:var(--accent);
-      border:2px solid rgba(255,77,109,0.12);
-    }
-
-    /* position buttons inside stage using absolute so no can jump */
-    .controls {
-      position:absolute;
-      width:100%;
-      height:100%;
-      pointer-events:none; /* allow buttons to be repositioned with pointer events on themselves */
-    }
+    .yes { background: linear-gradient(90deg,#ff6b81,#ff3b5c); color:white; }
+    .no { background: white; color:var(--accent); border:2px solid rgba(255,77,109,0.12); }
+    .controls { position:absolute; width:100%; height:100%; pointer-events:none; }
     .controls button { pointer-events:auto; position:absolute; }
-
-    /* initial positions */
     #yesBtn { left:calc(50% + 80px); top:50%; transform:translate(-50%,-50%) scale(1); }
     #noBtn  { left:calc(50% - 80px); top:50%; transform:translate(-50%,-50%); }
-
-    /* smooth movement */
-    #noBtn, #yesBtn {
-      transition: left 700ms cubic-bezier(.2,.9,.2,1), top 700ms cubic-bezier(.2,.9,.2,1), transform 350ms;
-    }
-
-    /* photo gallery for no-clicks (bottom-left) */
-    .no-gallery {
-      position:absolute;
-      left:12px;
-      bottom:12px;
-      display:flex;
-      gap:8px;
-      align-items:end;
-      max-width:40%;
-      max-height:40%;
-      overflow:hidden;
-    }
-    .no-gallery img {
-      width:84px;
-      height:64px;
-      object-fit:cover;
-      border-radius:10px;
-      box-shadow: 0 6px 14px rgba(80,30,60,0.12);
-      opacity:0;
-      transform: translateY(12px) scale(.98);
-      transition: opacity 450ms, transform 450ms;
-      border:3px solid rgba(255,255,255,0.6);
-    }
-    .no-gallery img.show {
-      opacity:1;
-      transform: translateY(0) scale(1);
-    }
-
-    /* overlay for yes result */
-    .yes-overlay {
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:18px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.0), rgba(255,240,246,0.7));
-      pointer-events:none;
-      opacity:0;
-      transition: opacity 350ms;
-    }
-    .yes-overlay.show {
-      opacity:1;
-      pointer-events:auto;
-    }
-    .yes-overlay img {
-      width:220px;
-      height:140px;
-      object-fit:cover;
-      border-radius:12px;
-      box-shadow: 0 12px 40px rgba(120,40,70,0.15);
-      transform:scale(.98);
-      transition: transform 450ms;
-    }
+    #noBtn, #yesBtn { transition: left 700ms cubic-bezier(.2,.9,.2,1), top 700ms cubic-bezier(.2,.9,.2,1), transform 350ms; }
+    .no-gallery { position:absolute; left:12px; bottom:12px; display:flex; gap:8px; align-items:end; max-width:40%; max-height:40%; overflow:hidden; }
+    .no-gallery img { width:84px; height:64px; object-fit:cover; border-radius:10px; box-shadow: 0 6px 14px rgba(80,30,60,0.12); opacity:0; transform: translateY(12px) scale(.98); transition: opacity 450ms, transform 450ms; border:3px solid rgba(255,255,255,0.6); }
+    .no-gallery img.show { opacity:1; transform: translateY(0) scale(1); }
+    .yes-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:18px; background: linear-gradient(180deg, rgba(255,255,255,0.0), rgba(255,240,246,0.7)); pointer-events:none; opacity:0; transition: opacity 350ms; }
+    .yes-overlay.show { opacity:1; pointer-events:auto; }
+    .yes-overlay img { width:220px; height:140px; object-fit:cover; border-radius:12px; box-shadow: 0 12px 40px rgba(120,40,70,0.15); transform:scale(.98); transition: transform 450ms; }
     .yes-overlay.show img { transform:scale(1); }
-
-    /* hearts */
-    .heart {
-      position:absolute;
-      width:26px;
-      height:26px;
-      background: linear-gradient(180deg,#ff6b81,#ff3b5c);
-      transform: rotate(-45deg);
-      left:50%;
-      top:50%;
-      border-radius:4px 4px 0 0;
-      pointer-events:none;
-      opacity:0.95;
-      animation: floatUp 2600ms linear forwards;
-      filter: drop-shadow(0 6px 14px rgba(120,40,70,0.12));
-    }
-    .heart::before, .heart::after {
-      content:"";
-      position:absolute;
-      width:26px;
-      height:26px;
-      background: linear-gradient(180deg,#ff6b81,#ff3b5c);
-      border-radius:50%;
-      top:-13px;
-      left:0;
-    }
+    .heart { position:absolute; width:26px; height:26px; background: linear-gradient(180deg,#ff6b81,#ff3b5c); transform: rotate(-45deg); left:50%; top:50%; border-radius:4px 4px 0 0; pointer-events:none; opacity:0.95; animation: floatUp 2600ms linear forwards; filter: drop-shadow(0 6px 14px rgba(120,40,70,0.12)); }
+    .heart::before, .heart::after { content:""; position:absolute; width:26px; height:26px; background: linear-gradient(180deg,#ff6b81,#ff3b5c); border-radius:50%; top:-13px; left:0; }
     .heart::after { left:13px; top:0; }
-
-    @keyframes floatUp {
-      0% { transform: translateY(0) scale(.8) rotate(-45deg); opacity:1; }
-      30% { transform: translateY(-60px) scale(1.05) rotate(-35deg); }
-      70% { transform: translateY(-180px) scale(.95) rotate(-15deg); opacity:0.85; }
-      100% { transform: translateY(-320px) scale(.6) rotate(-5deg); opacity:0; }
-    }
-
-    /* small footer */
-    .footer {
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:10px;
-      margin-top:12px;
-      color:var(--muted);
-      font-size:13px;
-    }
-
-    /* responsive */
-    @media (max-width:600px){
-      .yes-overlay img { width:120px; height:88px; }
-      .no-gallery img { width:64px; height:50px; }
-      #yesBtn, #noBtn { padding:10px 14px; font-size:16px; }
-    }
+    @keyframes floatUp { 0% { transform: translateY(0) scale(.8) rotate(-45deg); opacity:1; } 30% { transform: translateY(-60px) scale(1.05) rotate(-35deg); } 70% { transform: translateY(-180px) scale(.95) rotate(-15deg); opacity:0.85; } 100% { transform: translateY(-320px) scale(.6) rotate(-5deg); opacity:0; } }
+    .footer { display:flex; justify-content:center; align-items:center; gap:10px; margin-top:12px; color:var(--muted); font-size:13px; }
+    @media (max-width:600px){ .yes-overlay img { width:120px; height:88px; } .no-gallery img { width:64px; height:50px; } #yesBtn, #noBtn { padding:10px 14px; font-size:16px; } }
   </style>
 </head>
 <body>
@@ -245,25 +70,25 @@
     const yesImg2 = document.getElementById('yesImg2');
     const yesImg3 = document.getElementById('yesImg3');
 
-    // Customize these image/music URLs if you'd like to personalize:
+    // ====== FILES: Replace these with your own file names or URLs ======
+    // For local approach, put files in an "assets" folder next to index.html
     const noImages = [
-      "https://source.unsplash.com/collection/9542251/160x120", // small random romantic images
-      "https://source.unsplash.com/collection/827743/160x120",
-      "https://source.unsplash.com/featured/?rose,heart,flower,160x120",
-      "https://source.unsplash.com/featured/?cute,flower,strawberry,160x120",
-      "https://source.unsplash.com/featured/?bouquet,160x120"
+      "assets/no1.jpg",
+      "assets/no2.jpg",
+      "assets/no3.jpg",
+      "assets/no4.jpg"
     ];
 
     const yesImages = [
-      "https://source.unsplash.com/featured/?couple,romantic,1600x900",
-      "https://source.unsplash.com/featured/?roses,red,1600x900",
-      "https://source.unsplash.com/featured/?heart,romance,1600x900"
+      "assets/yes1.jpg",
+      "assets/yes2.jpg",
+      "assets/yes3.jpg"
     ];
 
-    // A short royalty-free sample music URL (replace with your own mp3 if you prefer)
-    const musicUrl = "https://cdn.pixabay.com/download/audio/2021/08/04/audio_9ed7b1c1f3.mp3?filename=romantic-12691.mp3";
+    // Music file - local or remote URL (e.g., "assets/music.mp3" or "https://.../music.mp3")
+    const musicUrl = "assets/music.mp3";
+    // ===================================================================
 
-    // text phrases for No button
     const pleadingPhrases = [
       "Please, Mai... ❤️",
       "Don't break my heart 😢",
@@ -280,89 +105,56 @@
     let noClicks = 0;
     let yesScale = 1;
 
-    // Utility: random integer in [min, max]
-    function randInt(min, max){
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
+    function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
 
-    // When No is clicked
     noBtn.addEventListener('click', (e) => {
       noClicks++;
-
-      // 1) Change text to a random pleading phrase
       const phrase = pleadingPhrases[(noClicks - 1) % pleadingPhrases.length];
       noBtn.textContent = phrase;
-
-      // 2) Move no button to a fun random place inside the stage
       moveButtonRandomly(noBtn);
-
-      // 3) Make yes button bigger
-      yesScale += 0.08; // grows a bit each no-click
+      yesScale += 0.08;
       yesBtn.style.transform = `translate(-50%,-50%) scale(${yesScale})`;
-
-      // 4) Show a photo (append to noGallery)
       addNoGalleryPhoto();
-
-      // small playful wiggle on yes button to draw attention
       yesBtn.animate([
         { transform: `translate(-50%,-50%) scale(${yesScale}) rotate(0deg)` },
         { transform: `translate(-50%,-50%) scale(${yesScale + 0.04}) rotate(-6deg)` },
         { transform: `translate(-50%,-50%) scale(${yesScale}) rotate(6deg)` },
         { transform: `translate(-50%,-50%) scale(${yesScale}) rotate(0deg)` }
-      ], {
-        duration: 700,
-        easing: 'ease-out'
-      });
+      ], { duration: 700, easing: 'ease-out' });
     });
 
-    // Move an element randomly within the stage while keeping it visible
     function moveButtonRandomly(btn){
       const rect = stage.getBoundingClientRect();
       const btnRect = btn.getBoundingClientRect();
-      const padding = 14; // don't move to extreme edges
-      // stage coordinate system: left/top relative to stage content box
+      const padding = 14;
       const maxLeft = rect.width - btnRect.width - padding;
       const maxTop = rect.height - btnRect.height - padding;
-
-      // choose a new position biased to the sides (fun)
       const newLeft = randInt(padding, Math.max(padding, Math.floor(maxLeft)));
       const newTop = randInt(padding, Math.max(padding, Math.floor(maxTop)));
-
-      // set as percentages to allow transitions
       btn.style.left = newLeft + "px";
       btn.style.top = newTop + "px";
-      btn.style.transform = "translate(0,0)"; // we've set absolute pos, so reset translate
+      btn.style.transform = "translate(0,0)";
     }
 
     function addNoGalleryPhoto(){
-      // pick next image (cycled)
       const idx = (noClicks - 1) % noImages.length;
-      const src = noImages[idx] + "&rand=" + Date.now(); // bust cache so images vary
+      const src = noImages[idx] + (noImages[idx].includes('?') ? '&' : '?') + "rand=" + Date.now();
       const img = document.createElement('img');
       img.src = src;
       img.alt = "cute photo";
       noGallery.appendChild(img);
-
-      // show with animation after load (or timeout fallback)
       img.onload = () => { setTimeout(()=> img.classList.add('show'), 40); };
       setTimeout(()=> img.classList.add('show'), 200);
-
-      // keep at most 6 thumbnails
-      while (noGallery.children.length > 6) {
-        noGallery.removeChild(noGallery.firstChild);
-      }
+      while (noGallery.children.length > 6) { noGallery.removeChild(noGallery.firstChild); }
     }
 
-    // When Yes clicked
     yesBtn.addEventListener('click', async (e) => {
-      // Show three photos
-      yesImg1.src = yesImages[0] + "&rand=" + Date.now();
-      yesImg2.src = yesImages[1] + "&rand=" + Date.now();
-      yesImg3.src = yesImages[2] + "&rand=" + Date.now();
+      yesImg1.src = yesImages[0] + (yesImages[0].includes('?') ? '&' : '?') + "rand=" + Date.now();
+      yesImg2.src = yesImages[1] + (yesImages[1].includes('?') ? '&' : '?') + "rand=" + Date.now();
+      yesImg3.src = yesImages[2] + (yesImages[2].includes('?') ? '&' : '?') + "rand=" + Date.now();
 
       yesOverlay.classList.add('show');
 
-      // Play music
       try {
         const audio = new Audio(musicUrl);
         audio.volume = 0.85;
@@ -371,10 +163,7 @@
         console.warn("Audio play failed (browser autoplay policy). Try clicking again.", err);
       }
 
-      // Spawn hearts randomly for a few seconds
       spawnHearts(24);
-
-      // Optionally, lock the buttons to prevent further antics
       disableControlsTemporary();
     });
 
@@ -383,7 +172,6 @@
       yesBtn.disabled = true;
       noBtn.style.cursor = 'default';
       yesBtn.style.cursor = 'default';
-      // re-enable after 6 seconds in case you want to allow more interaction
       setTimeout(()=>{
         noBtn.disabled = false;
         yesBtn.disabled = false;
@@ -392,46 +180,32 @@
       }, 6000);
     }
 
-    // Create hearts with random positions and timings
     function spawnHearts(count=20){
       const stageRect = stage.getBoundingClientRect();
       for(let i=0;i<count;i++){
         const heart = document.createElement('div');
         heart.className = 'heart';
-        // random size
         const size = randInt(18, 40);
         heart.style.width = size + 'px';
         heart.style.height = size + 'px';
-        heart.style.left = randInt(10, stageRect.width - 30) + 'px';
+        heart.style.left = randInt(10, Math.max(10, stageRect.width - 30)) + 'px';
         heart.style.top = randInt(stageRect.height - 60, stageRect.height - 10) + 'px';
-        // slight color variation
-        heart.style.background = `linear-gradient(180deg, rgb(${randInt(255,255)},${randInt(80,100)},${randInt(100,120)}), rgb(${randInt(255,200)},${randInt(60,20)},${randInt(80,40)}))`;
-
-        // random animation delay
+        heart.style.background = `linear-gradient(180deg, rgb(${randInt(220,255)},${randInt(70,110)},${randInt(90,140)}), rgb(${randInt(200,255)},${randInt(30,70)},${randInt(60,120)}))`;
         heart.style.animationDelay = (Math.random()*800) + 'ms';
         heart.style.opacity = 0.95 - Math.random()*0.2;
-
         stage.appendChild(heart);
-
-        // remove after animation
-        setTimeout(()=> {
-          heart.remove();
-        }, 3400 + Math.random()*800);
+        setTimeout(()=> { heart.remove(); }, 3400 + Math.random()*800);
       }
     }
 
-    // initialize positions so CSS translate(-50%,-50%) continues to center the yes/no buttons
     function initButtonPositions(){
-      // compute center coords and set left/top px so later transforms to scale still work
       const rect = stage.getBoundingClientRect();
       const centerX = Math.floor(rect.width/2);
       const centerY = Math.floor(rect.height/2);
-      // place no left-of-center, yes right-of-center
       noBtn.style.left = (centerX - 80) + 'px';
       noBtn.style.top = (centerY) + 'px';
       yesBtn.style.left = (centerX + 80) + 'px';
       yesBtn.style.top = (centerY) + 'px';
-      // reset transforms to preserve centering with translate(-50%,-50%)
       noBtn.style.transform = 'translate(-50%,-50%)';
       yesBtn.style.transform = 'translate(-50%,-50%) scale(1)';
     }
