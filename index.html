@@ -95,18 +95,18 @@
       border:2px solid rgba(255,77,109,0.12);
     }
 
-    /* adjusted button positions (down a bit to avoid center asset) */
+    /* adjusted button positions (down a bit) */
     #yesBtn { left:calc(50% + 80px); top:72%; }
     #noBtn  { left:calc(50% - 80px); top:72%; }
 
-    /* centered GIF — made smaller and higher so it doesn't overlap header or buttons */
+    /* centered GIF — smaller and higher so it doesn't overlap header or buttons */
     .center-gif{
       position:absolute;
       left:50%;
-      top:30%;                 /* higher in the stage but not too high */
+      top:30%;
       transform:translate(-50%,-50%);
-      width:180px;             /* smaller so it doesn't dominate or overlap */
-      height:180px;
+      width:160px;
+      height:160px;
       object-fit:cover;
       border-radius:10px;
       box-shadow:0 18px 40px rgba(120,40,70,0.10);
@@ -173,27 +173,23 @@
     .yes-overlay.show img { transform:scale(1); }
     .yes-overlay img:hover { transform: scale(1.04); box-shadow: 0 18px 50px rgba(120,40,70,0.2); }
 
-    /* Love letter area — moved below stage to avoid overlapping yes photos */
-    .love-letter-wrap {
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      margin-top:12px;
-      z-index:12;
-      pointer-events:auto;
-    }
+    /* Love letter button — absolute inside stage; shown after Yes, placed below yes photos and above buttons */
     .love-letter-btn {
-      padding:14px 22px;
-      border-radius:14px;
+      position:absolute;
+      left:50%;
+      transform:translate(-50%,0);
+      z-index:12;
+      padding:18px 28px;
+      border-radius:18px;
       border:0;
-      background: linear-gradient(90deg,#ffb3c7,#ff6b90);
+      background: linear-gradient(90deg,#ff9fb8,#ff5f90);
       color:#fff;
-      font-weight:800;
-      font-size:18px;
+      font-weight:900;
       cursor:pointer;
-      box-shadow: 0 14px 36px rgba(255,100,140,0.18);
-      display:none; /* becomes visible after Yes */
-      transform-origin:center;
+      box-shadow: 0 18px 44px rgba(255,90,140,0.18);
+      display:none; /* shown after yes */
+      font-size:20px;
+      white-space:nowrap;
     }
     .love-letter-btn:focus { outline: 3px solid rgba(255,110,150,0.18); }
 
@@ -281,7 +277,7 @@
     .letter-text { margin:0; font-size:18px; line-height:1.6; color:#4a2a36; white-space:pre-wrap; }
     .letter-close { position:absolute; top:12px; right:12px; background:transparent; border:0; font-size:20px; cursor:pointer; padding:6px 8px; color:#6a3b47; }
 
-    /* hearts (unchanged) */
+    /* hearts */
     .heart { position:absolute; width:26px; height:26px; background: linear-gradient(180deg,#ff6b81,#ff3b5c); transform: rotate(-45deg); left:50%; top:50%; border-radius:4px 4px 0 0; pointer-events:none; opacity:0.95; animation: floatUp 2600ms linear forwards; filter: drop-shadow(0 6px 14px rgba(120,40,70,0.12)); }
     .heart::before, .heart::after { content:""; position:absolute; width:26px; height:26px; background: linear-gradient(180deg,#ff6b81,#ff3b5c); border-radius:50%; top:-13px; left:0; }
     .heart::after { left:13px; top:0; }
@@ -292,11 +288,11 @@
 
     /* responsive tweaks */
     @media (max-width:700px){
-      .center-gif{ width:140px; height:140px; top:26%; }
+      .center-gif{ width:120px; height:120px; top:26%; }
       .yes-overlay img{ width:140px; height:96px; }
       .no-gallery img{ width:60px; height:50px; }
       #yesBtn,#noBtn { top:80%; padding:10px 14px; font-size:15px; }
-      .love-letter-btn { font-size:16px; padding:12px 18px; border-radius:12px; }
+      .love-letter-btn { font-size:18px; padding:14px 22px; border-radius:16px; }
     }
   </style>
 </head>
@@ -323,10 +319,8 @@
         <img id="yesImg2" alt="surprise photo 2" />
         <img id="yesImg3" alt="surprise photo 3" />
       </div>
-    </div>
 
-    <!-- Love letter placed outside the stage (below it) to avoid overlapping photos -->
-    <div class="love-letter-wrap">
+      <!-- love letter button (absolute inside stage) -->
       <button id="loveLetterBtn" class="love-letter-btn" aria-hidden="true" aria-label="Open love letter">💌 Open Love Letter</button>
     </div>
 
@@ -444,6 +438,7 @@ u are the best thing that happened to me
     }
     letterClose.addEventListener('click', hideLetter);
     letterModal.addEventListener('click', (e) => { if (e.target === letterModal) hideLetter(); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') { hidePopup(); hideLetter(); } });
 
     // center GIF interaction
     centerGif.addEventListener('click', () => showPopup(centerGif.src, 0));
@@ -495,16 +490,8 @@ u are the best thing that happened to me
       // 4) spawn hearts
       spawnHearts(28);
 
-      // 5) show love letter button after photos appear (placed below stage to avoid overlap)
-      setTimeout(() => {
-        loveLetterBtn.style.display = 'inline-block';
-        loveLetterBtn.setAttribute('aria-hidden', 'false');
-        // entrance flourish
-        loveLetterBtn.animate([
-          { transform: 'scale(.92) translateY(8px)', opacity: 0 },
-          { transform: 'scale(1) translateY(0)', opacity: 1 }
-        ], { duration: 420, easing: 'cubic-bezier(.2,.9,.2,1)' });
-      }, 520);
+      // 5) compute and show love letter button positioned under yes photos and above buttons
+      setTimeout(positionAndShowLoveButton, 520);
 
       // temporarily disable both buttons to avoid repeats
       disableControlsTemporary();
@@ -515,7 +502,7 @@ u are the best thing that happened to me
       noClicks++;
       const phrase = pleadingPhrases[(noClicks - 1) % pleadingPhrases.length];
       noBtn.textContent = phrase;
-      moveButtonRandomlyAvoidingCenter(noBtn);
+      moveButtonRandomlyAvoidingForbidden(noBtn);
       yesScale += 0.06;
       yesBtn.style.transform = `translate(-50%,-50%) scale(${yesScale})`;
       addNoGalleryPhoto(true);
@@ -527,12 +514,12 @@ u are the best thing that happened to me
       ], { duration: 600, easing: 'ease-out' });
     });
 
-    // Move button randomly but avoid overlapping the centered GIF area (if visible)
-    function moveButtonRandomlyAvoidingCenter(btn){
+    // Move button randomly but avoid forbidden areas (center GIF, yes overlay, header, no-gallery, love button, yes button)
+    function moveButtonRandomlyAvoidingForbidden(btn){
       const rect = stage.getBoundingClientRect();
       const btnRect = btn.getBoundingClientRect();
 
-      const padding = 12;
+      const padding = 10;
       const halfW = btnRect.width / 2;
       const halfH = btnRect.height / 2;
       const minX = halfW + padding;
@@ -540,38 +527,127 @@ u are the best thing that happened to me
       const minY = halfH + padding;
       const maxY = rect.height - halfH - padding;
 
-      const gifVisible = centerGif.offsetParent !== null && centerGif.style.display !== 'none';
-      let gifArea = null;
-      if (gifVisible) {
-        const centerRect = centerGif.getBoundingClientRect();
-        gifArea = {
-          left: Math.max(0, centerRect.left - rect.left),
-          top: Math.max(0, centerRect.top - rect.top),
-          right: Math.min(rect.width, centerRect.right - rect.left),
-          bottom: Math.min(rect.height, centerRect.bottom - rect.top)
-        };
-        const avoidPadding = 10;
-        gifArea.x1 = gifArea.left - avoidPadding;
-        gifArea.y1 = gifArea.top - avoidPadding;
-        gifArea.x2 = gifArea.right + avoidPadding;
-        gifArea.y2 = gifArea.bottom + avoidPadding;
+      // Build forbidden rectangles in stage-relative coordinates
+      const forbidden = [];
+
+      // header/top area (avoid overlapping header text)
+      const cardHeader = document.querySelector('header');
+      if (cardHeader) {
+        const hRect = cardHeader.getBoundingClientRect();
+        const stageRect = stage.getBoundingClientRect();
+        const relTop = Math.max(0, hRect.top - stageRect.top);
+        const relBottom = Math.max(0, hRect.bottom - stageRect.top);
+        // only add if header overlaps the stage vertical span
+        forbidden.push({ left: 0, top: 0, right: rect.width, bottom: Math.min(rect.height, relBottom + 6) });
       }
 
+      // center GIF area (if visible)
+      if (centerGif.offsetParent !== null && centerGif.style.display !== 'none') {
+        const g = centerGif.getBoundingClientRect();
+        forbidden.push({
+          left: Math.max(0, g.left - rect.left - 8),
+          top: Math.max(0, g.top - rect.top - 8),
+          right: Math.min(rect.width, g.right - rect.left + 8),
+          bottom: Math.min(rect.height, g.bottom - rect.top + 8)
+        });
+      }
+
+      // yes overlay area (if visible)
+      if (yesOverlay.classList.contains('show')) {
+        const y1 = yesOverlay.getBoundingClientRect();
+        forbidden.push({
+          left: Math.max(0, y1.left - rect.left - 8),
+          top: Math.max(0, y1.top - rect.top - 8),
+          right: Math.min(rect.width, y1.right - rect.left + 8),
+          bottom: Math.min(rect.height, y1.bottom - rect.top + 8)
+        });
+      }
+
+      // no-gallery area
+      if (noGallery.children.length > 0) {
+        const g = noGallery.getBoundingClientRect();
+        forbidden.push({
+          left: Math.max(0, g.left - rect.left - 6),
+          top: Math.max(0, g.top - rect.top - 6),
+          right: Math.min(rect.width, g.right - rect.left + 6),
+          bottom: Math.min(rect.height, g.bottom - rect.top + 6)
+        });
+      }
+
+      // love-letter button area (if visible)
+      if (loveLetterBtn.style.display !== 'none') {
+        const l = loveLetterBtn.getBoundingClientRect();
+        forbidden.push({
+          left: Math.max(0, l.left - rect.left - 6),
+          top: Math.max(0, l.top - rect.top - 6),
+          right: Math.min(rect.width, l.right - rect.left + 6),
+          bottom: Math.min(rect.height, l.bottom - rect.top + 6)
+        });
+      }
+
+      // yes button should not overlap either
+      const yRect = yesBtn.getBoundingClientRect();
+      forbidden.push({
+        left: Math.max(0, yRect.left - rect.left - 6),
+        top: Math.max(0, yRect.top - rect.top - 6),
+        right: Math.min(rect.width, yRect.right - rect.left + 6),
+        bottom: Math.min(rect.height, yRect.bottom - rect.top + 6)
+      });
+
+      // Try to find a safe spot
       let attempts = 0;
       let chosenX, chosenY;
-      while (attempts < 18) {
+      while (attempts < 40) {
         const candidateX = randInt(minX, Math.max(minX, Math.floor(maxX)));
         const candidateY = randInt(minY, Math.max(minY, Math.floor(maxY)));
-        if (!gifArea) { chosenX = candidateX; chosenY = candidateY; break; }
-        const candidateRect = { left: candidateX - halfW, top: candidateY - halfH, right: candidateX + halfW, bottom: candidateY + halfH };
-        const overlap = !(candidateRect.right < gifArea.x1 || candidateRect.left > gifArea.x2 || candidateRect.bottom < gifArea.y1 || candidateRect.top > gifArea.y2);
-        if (!overlap) { chosenX = candidateX; chosenY = candidateY; break; }
+        const candidateRect = {
+          left: candidateX - halfW,
+          top: candidateY - halfH,
+          right: candidateX + halfW,
+          bottom: candidateY + halfH
+        };
+        let overlapAny = false;
+        for (const f of forbidden) {
+          if (!(candidateRect.right < f.left || candidateRect.left > f.right || candidateRect.bottom < f.top || candidateRect.top > f.bottom)) {
+            overlapAny = true;
+            break;
+          }
+        }
+        if (!overlapAny) {
+          chosenX = candidateX;
+          chosenY = candidateY;
+          break;
+        }
         attempts++;
       }
+
+      // If not found, choose the closest safe fallback: try a few anchor positions (corners / below center)
       if (chosenX === undefined) {
-        const tryY = Math.min(maxY, Math.max(minY, Math.round((gifArea ? gifArea.y2 : rect.height/2) + halfH + 8)));
-        const tryX = randInt(minX, Math.max(minX, Math.floor(maxX)));
-        chosenX = tryX; chosenY = tryY;
+        const anchors = [
+          { x: minX + 14, y: maxY - 14 },
+          { x: maxX - 14, y: maxY - 14 },
+          { x: Math.floor(rect.width / 2), y: maxY - 24 },
+          { x: Math.floor(rect.width / 2), y: minY + 24 }
+        ];
+        for (const a of anchors) {
+          const candidateRect = { left: a.x - halfW, top: a.y - halfH, right: a.x + halfW, bottom: a.y + halfH };
+          let overlapAny = false;
+          for (const f of forbidden) {
+            if (!(candidateRect.right < f.left || candidateRect.left > f.right || candidateRect.bottom < f.top || candidateRect.top > f.bottom)) {
+              overlapAny = true;
+              break;
+            }
+          }
+          if (!overlapAny) { chosenX = a.x; chosenY = a.y; break; }
+        }
+      }
+
+      // final fallback: keep near current position but nudged
+      if (chosenX === undefined) {
+        const currentLeft = (btnRect.left - rect.left) + halfW;
+        const currentTop = (btnRect.top - rect.top) + halfH;
+        chosenX = Math.max(minX, Math.min(maxX, currentLeft + 20));
+        chosenY = Math.max(minY, Math.min(maxY, currentTop + 20));
       }
 
       btn.style.left = chosenX + "px";
@@ -611,7 +687,7 @@ u are the best thing that happened to me
       }
     }
 
-    // init positions (buttons placed lower than center GIF)
+    // initialize positions (buttons placed lower than center GIF)
     function initButtonPositions(){
       const rect = stage.getBoundingClientRect();
       const centerX = Math.floor(rect.width/2);
@@ -628,20 +704,65 @@ u are the best thing that happened to me
     window.addEventListener('load', initButtonPositions);
     window.addEventListener('resize', initButtonPositions);
 
-    // Love letter button binding
+    // Love letter button: position it dynamically to avoid overlapping yes photos and buttons
+    function positionAndShowLoveButton(){
+      const rect = stage.getBoundingClientRect();
+
+      // Determine yesOverlay region (if shown)
+      let overlayRect = null;
+      if (yesOverlay.classList.contains('show')) {
+        overlayRect = yesOverlay.getBoundingClientRect();
+      }
+
+      // Determine safe Y: place love button just below overlay's bottom, but above the buttons
+      const buttonsRect = {
+        left: Math.min(yesBtn.getBoundingClientRect().left, noBtn.getBoundingClientRect().left),
+        right: Math.max(yesBtn.getBoundingClientRect().right, noBtn.getBoundingClientRect().right),
+        top: Math.min(yesBtn.getBoundingClientRect().top, noBtn.getBoundingClientRect().top),
+        bottom: Math.max(yesBtn.getBoundingClientRect().bottom, noBtn.getBoundingClientRect().bottom)
+      };
+
+      // convert to stage-relative
+      const stageLeft = rect.left;
+      const stageTop = rect.top;
+      const overlayBottomRel = overlayRect ? (overlayRect.bottom - stageTop) : Math.floor(rect.height / 2);
+      const buttonsTopRel = (buttonsRect.top - stageTop);
+
+      // desired top: midway between overlay bottom and buttons top, with padding
+      const gap = 12;
+      let desiredY = overlayBottomRel + gap + 0; // start just below overlay
+      // ensure desiredY + btnHeight/2 < buttonsTopRel - gap
+      const btnHeight = loveLetterBtn.getBoundingClientRect().height || 48;
+      const maxAllowed = buttonsTopRel - gap - (btnHeight / 2);
+      if (desiredY > maxAllowed) {
+        // fallback: put slightly above buttons
+        desiredY = Math.max(overlayBottomRel + gap, maxAllowed - 4);
+      }
+      // clamp within stage
+      desiredY = Math.max(btnHeight/2 + 8, Math.min(rect.height - btnHeight/2 - 8, desiredY));
+
+      // set position
+      loveLetterBtn.style.left = (rect.width / 2) + "px";
+      loveLetterBtn.style.top = desiredY + "px";
+      loveLetterBtn.style.display = 'inline-block';
+      loveLetterBtn.setAttribute('aria-hidden', 'false');
+
+      // entrance flourish
+      loveLetterBtn.animate([
+        { transform: 'translate(-50%,8px) scale(.94)', opacity: 0 },
+        { transform: 'translate(-50%,0) scale(1)', opacity: 1 }
+      ], { duration: 420, easing: 'cubic-bezier(.2,.9,.2,1)' });
+
+      // ensure noBtn won't try to move into the love button right away by briefly avoiding it
+    }
+
+    // Bind love letter open
     loveLetterBtn.addEventListener('click', showLetter);
     loveLetterBtn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showLetter(); } });
 
-    // keyboard for popup/letter close
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { hidePopup(); hideLetter(); }
-    });
+    // ensure overlay images open popup (set when yes clicked)
+    // ensure no-gallery thumbs set on addNoGalleryPhoto
 
-    // make sure overlay images open popup (these are set when yes clicked)
-    // addNoGalleryPhoto will set on-click for no thumbs
-
-    // helper to hide letter
-    function hideLetter() { letterModal.classList.remove('show'); letterModal.setAttribute('aria-hidden', 'true'); }
   </script>
 </body>
 </html>
